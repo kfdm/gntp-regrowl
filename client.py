@@ -2,7 +2,7 @@
 
 import sys
 from gntp.notifier import GrowlNotifier
-from gntp.config import Config
+from config import Config
 from optparse import OptionParser
 
 class ClientConfig(Config):

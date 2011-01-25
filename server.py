@@ -3,7 +3,7 @@
 import SocketServer
 import traceback
 import time
-from gntp.config import Config
+from config import Config
 from optparse import OptionParser
 
 class ServerConfig(Config):
