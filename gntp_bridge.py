@@ -62,6 +62,18 @@ def get_resource(self,key):
 	except Exception,e:
 		print e
 		return None
+	
+def add_origin_info(self):
+	self.add_header('Origin-Machine-Name',platform.node())
+	self.add_header('Origin-Software-Name','ReGrowl Server')
+	self.add_header('Origin-Software-Version','0.1')
+	self.add_header('Origin-Platform-Name',platform.system())
+	self.add_header('Origin-Platform-Version',platform.platform())
 
 GNTPRegister.send = register_send
 GNTPNotice.send = notice_send
+
+GNTPOK.add_origin_info = add_origin_info
+GNTPError.add_origin_info = add_origin_info
+
+
