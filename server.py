@@ -3,63 +3,15 @@
 import SocketServer
 import traceback
 import time
-from config import Config
-from optparse import OptionParser
 
-class ServerConfig(Config):
-	_defaults = {
-		'gntp':{
-			'host':'localhost',
-			'port':23053,
-			'password':'',
-		},
-		'server':{
-			'address':'',
-			'port':23053,
-			'password':'',
-			'regrowl':False,
-			'debug':False,
-		},
-	}
-	_booleans = ['server.debug','server.regrowl']
-	_ints = ['gntp.port','server.port']
-	_editor = True
-	
-class ServerParser(OptionParser):
-	def __init__(self,file):
-		OptionParser.__init__(self)
-		self._config = ServerConfig(file)
-		
-		# Network Options		
-		self.add_option("-a","--address",help="address to listen on",
-					dest="host",default=self._config['server.address'])
-		self.add_option("-p","--port",help="port to listen on",
-					dest="port",type="int",default=self._config['server.port'])
-		self.add_option("-P","--password",help="Network password",
-					dest='password',default=self._config['server.password'])
-		
-		# Misc Options
-		self.add_option("-r","--regrowl",help="ReGrowl on local OSX machine",
-					dest='regrowl',action="store_true",default=self._config['server.regrowl'])
-		self.add_option("-e","--edit",help="Open config in $EDITOR",
-					dest='edit',action="store_true",default=False)
-		
-		# Debug Options
-		self.add_option("-d","--debug",help="Print raw growl packets",
-					dest='debug',action="store_true",default=self._config['server.debug'])
-		self.add_option("-q","--quiet",help="Quiet mode",
-					dest='debug',action="store_false")
-	def parse_args(self, args=None, values=None):
-		values, args = OptionParser.parse_args(self, args, values)
-		if values.edit: exit(self._config.editor())
-		return values, args
+import gntp_bridge as gntp
 
 class GNTPServer(SocketServer.TCPServer):
-	def serve_forever(self):
+	def run(self):
 		if self.growl_debug:
 			sa = self.socket.getsockname()
 			print "Listening for GNTP on", sa[0], "port", sa[1], "..."
-		SocketServer.TCPServer.serve_forever(self)
+		self.serve_forever()
 
 class GNTPHandler(SocketServer.StreamRequestHandler):
 	def read(self):
@@ -85,7 +37,6 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
 		
 		try:
 			message = gntp.parse_gntp(self.data,self.server.growl_password)
-			message.send()
 			
 			response = gntp.GNTPOK(action=message.info['messagetype'])
 			if message.info['messagetype'] == 'NOTICE':
@@ -104,16 +55,15 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
 			self.write(error.encode())
 			raise
 		
+		message.send()
+		
 if __name__ == "__main__":
-	(options,args) = ServerParser('~/.gntp').parse_args()
+	from Parser import ServerParser
 	
-	if options.regrowl:
-		import gntp_bridge as gntp
-	else:
-		import gntp
+	(options,args) = ServerParser().parse_args()
 	
 	server = GNTPServer((options.host, options.port), GNTPHandler)
 	server.growl_debug = options.debug
 	server.growl_password = options.password
 	
-	server.serve_forever()
+	server.run()
