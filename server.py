@@ -62,8 +62,21 @@ if __name__ == "__main__":
 	
 	(options,args) = ServerParser().parse_args()
 	
-	server = GNTPServer((options.host, options.port), GNTPHandler)
+	try:
+		server = GNTPServer((options.host, options.port), GNTPHandler)
+	except SocketServer.socket.error:
+		print 'There is already a server running on port %d'%options.port
+		exit(1)
 	server.growl_debug = options.debug
 	server.growl_password = options.password
 	
-	server.run()
+	try: 
+		import setproctitle
+		setproctitle.setproctitle('ReGrowl:%d'%options.port)
+	except ImportError:
+		pass
+	
+	try:
+		server.run()
+	except KeyboardInterrupt:
+		pass
