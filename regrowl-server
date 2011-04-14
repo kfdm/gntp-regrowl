@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#
+# ReGrowl Server
+# A simple ? server for *regrowling* GNTP messages to the local OSX Growl system
 
 import SocketServer
 import traceback
