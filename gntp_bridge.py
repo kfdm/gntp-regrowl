@@ -7,7 +7,9 @@ def register_send(self):
 	'''
 	Resend a GNTP Register message to Growl running on a local OSX Machine
 	'''
-	logging.getLogger('ReGrowl').info('Sending local registration')
+	logger = logging.getLogger('ReGrowl')
+	logger.info('Sending local registration')
+	logger.debug('    Application: %s',self.headers['Application-Name'])
 	
 	#Local growls only need a list of strings
 	notifications=[]
@@ -32,7 +34,12 @@ def notice_send(self):
 	'''
 	Resend a GNTP Notify message to Growl running on a local OSX Machine
 	'''
-	logging.getLogger('ReGrowl').info('Sending local notification')
+	logger = logging.getLogger('ReGrowl')
+	logger.info('Sending local notification')
+	logger.debug('    Application: %s',self.headers['Application-Name'])
+	logger.debug('    Notification: %s',self.headers['Notification-Name'])
+	logger.debug('    Title: %s',self.headers['Notification-Title'])
+	logger.debug('    Text: %s',self.headers['Notification-Text'])
 	
 	growl = Growl.GrowlNotifier(
 		applicationName			= self.headers['Application-Name'],
@@ -50,13 +57,16 @@ def notice_send(self):
 	return self.encode()
 
 def get_resource(self,key):
-	logging.getLogger('ReGrowl').info('Getting resource')
+	logger = logging.getLogger('ReGrowl')
 	try:
 		resource = self.headers.get(key,'')
 		if resource.startswith('x-growl-resource://'):
+			logger.info('Getting inline resource')
 			resource = resource.split('://')
 			return self.resources.get(resource[1])['Data']
 		elif resource.startswith('http'):
+			logger.info('Getting url resource')
+			logger.debug('    %s',resource)
 			resource = resource.replace(' ', '%20')
 			icon = urllib2.urlopen(resource,None,5)
 			return icon.read()
