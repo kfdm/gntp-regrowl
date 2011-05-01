@@ -5,15 +5,23 @@
 
 import SocketServer
 import traceback
-import time
+import logging
 
 import gntp_bridge as gntp
 
+
 class GNTPServer(SocketServer.TCPServer):
+	def __init__(self, options, RequestHandlerClass):
+		try:
+			SocketServer.TCPServer.__init__(self, (options.host, options.port), RequestHandlerClass)
+		except:
+			logging.getLogger('Server').critical('There is already a server running on port %d'%options.port)
+			exit(1)
+		self.options = options
+		logging.getLogger('Server').info('Activating server')
 	def run(self):
-		if self.growl_debug:
-			sa = self.socket.getsockname()
-			print "Listening for GNTP on", sa[0], "port", sa[1], "..."
+		sa = self.socket.getsockname()
+		logging.getLogger('Server').info('Listening for GNTP on %s port %s'%(sa[0],sa[1]))
 		self.serve_forever()
 
 class GNTPHandler(SocketServer.StreamRequestHandler):
@@ -22,24 +30,21 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
 		buffer = ''
 		while(1):
 			data = self.request.recv(bufferLength)
-			if self.server.growl_debug:
-				print 'Reading',len(data)
+			logging.getLogger('Server').info('Reading %s Bytes',len(data))
 			buffer = buffer + data
 			if len(data) < bufferLength and buffer.endswith('\r\n\r\n'):
 				break
-		if self.server.growl_debug:
-			print '<Reading>\n',buffer,'\n</Reading>'
+		logging.getLogger('Server').debug(buffer)
 		return buffer
 	def write(self,msg):
-		if self.server.growl_debug:
-			print '<Writing>\n',msg,'\n</Writing>'
+		logging.getLogger('Server').debug(msg)
 		self.request.sendall(msg)
 	def handle(self):
 		reload(gntp)
 		self.data = self.read()
 		
 		try:
-			message = gntp.parse_gntp(self.data,self.server.growl_password)
+			message = gntp.parse_gntp(self.data,self.server.options.password)
 			
 			response = gntp.GNTPOK(action=message.info['messagetype'])
 			if message.info['messagetype'] == 'NOTICE':
@@ -64,22 +69,10 @@ if __name__ == "__main__":
 	from Parser import ServerParser
 	
 	(options,args) = ServerParser().parse_args()
+		
+	logging.basicConfig(
+		level=(logging.DEBUG if options.debug else logging.INFO),
+		format='%(name)-12s: %(levelname)-8s %(message)s')
 	
-	try:
-		server = GNTPServer((options.host, options.port), GNTPHandler)
-	except SocketServer.socket.error:
-		print 'There is already a server running on port %d'%options.port
-		exit(1)
-	server.growl_debug = options.debug
-	server.growl_password = options.password
-	
-	try: 
-		import setproctitle
-		setproctitle.setproctitle('ReGrowl:%d'%options.port)
-	except ImportError:
-		pass
-	
-	try:
-		server.run()
-	except KeyboardInterrupt:
-		pass
+	server = GNTPServer(options, GNTPHandler)
+	server.run()

@@ -1,12 +1,13 @@
 from gntp import *
 import urllib2
 import Growl
+import logging
 
 def register_send(self):
 	'''
 	Resend a GNTP Register message to Growl running on a local OSX Machine
 	'''
-	print 'Sending Local Registration'
+	logging.getLogger('ReGrowl').info('Sending local registration')
 	
 	#Local growls only need a list of strings
 	notifications=[]
@@ -31,7 +32,8 @@ def notice_send(self):
 	'''
 	Resend a GNTP Notify message to Growl running on a local OSX Machine
 	'''
-	print 'Sending Local Notification'
+	logging.getLogger('ReGrowl').info('Sending local notification')
+	
 	growl = Growl.GrowlNotifier(
 		applicationName			= self.headers['Application-Name'],
 		notifications			= [self.headers['Notification-Name']]
@@ -48,6 +50,7 @@ def notice_send(self):
 	return self.encode()
 
 def get_resource(self,key):
+	logging.getLogger('ReGrowl').info('Getting resource')
 	try:
 		resource = self.headers.get(key,'')
 		if resource.startswith('x-growl-resource://'):

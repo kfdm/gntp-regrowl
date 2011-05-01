@@ -1,5 +1,6 @@
 from optparse import OptionParser,OptionGroup
 import pydefaults
+import sys
 
 class ServerParser(OptionParser):
 	def __init__(self,domain='com.github.kfdm.gntp'):
