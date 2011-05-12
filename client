@@ -2,13 +2,15 @@
 
 import sys
 from gntp.notifier import GrowlNotifier
-
-
+import logging
 
 if __name__ == "__main__":
 	from Parser import ClientParser
 	
 	(options,message) = ClientParser().parse_args()
+	
+	if options.debug:
+		logging.basicConfig(level=options.verbose)
 	
 	growl = GrowlNotifier(
 		applicationName = options.app,

@@ -1,4 +1,5 @@
 from optparse import OptionParser,OptionGroup
+import logging
 import pydefaults
 import sys
 
@@ -55,6 +56,8 @@ class ClientParser(OptionParser):
 		group = OptionGroup(self,'Extra')
 		group.add_option("-d","--debug",help="Print raw growl packets",
 						dest='debug',action="store_true",default=False)
+		group.add_option('-v','--verbose',help="Debug level",
+						dest='verbose',action='store_const',const=logging.DEBUG,default=logging.INFO)
 		group.add_option("-s","--sticky",help="Make the notification sticky [%default]",
 						dest='sticky',action="store_true",default=False)
 		group.add_option("-p","--priority",help="-2 to 2 [%default]",
