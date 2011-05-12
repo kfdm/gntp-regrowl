@@ -73,10 +73,22 @@ if __name__ == "__main__":
 	from Parser import ServerParser
 	
 	(options,args) = ServerParser().parse_args()
-		
-	logging.basicConfig(
-		level=(logging.DEBUG if options.debug else logging.INFO),
-		format='%(name)-12s: %(levelname)-8s %(message)s')
+	
+	try: 
+		import setproctitle
+		setproctitle.setproctitle('regrowl-server')
+	except ImportError:
+		pass
+	logging.basicConfig(level=logging.DEBUG,
+		format='%(name)-12s: %(levelname)-8s %(message)s',
+		datefmt='%m-%d %H:%M',
+		filename=options.log)
+	
+	console = logging.StreamHandler()
+	console.setLevel(logging.INFO)
+	formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+	console.setFormatter(formatter)
+	logging.getLogger('').addHandler(console)
 	
 	server = GNTPServer(options, GNTPHandler)
 	server.run()

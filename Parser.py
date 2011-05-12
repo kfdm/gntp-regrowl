@@ -2,6 +2,10 @@ from optparse import OptionParser,OptionGroup
 import logging
 import pydefaults
 import sys
+import os
+
+def store_path(option,opt,value,parser):
+	setattr(parser.values, option.dest, os.path.realpath(value))
 
 class ServerParser(OptionParser):
 	def __init__(self,domain='com.github.kfdm.gntp'):
@@ -17,6 +21,10 @@ class ServerParser(OptionParser):
 					dest='password',default=self.settings['password'])
 		
 		# Debug Options
+		self.add_option('-l','--log',dest='log',default=self.settings['serverlog'],
+					action='callback',callback=store_path,type=str)
+		self.add_option('-v','--verbose',dest='verbose',default=logging.INFO,
+					action='store_const',const=logging.DEBUG)
 		self.add_option("-d","--debug",help="Print raw growl packets",
 					dest='debug',action="store_true",default=False)
 		self.add_option("-q","--quiet",help="Quiet mode",
