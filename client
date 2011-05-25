@@ -19,7 +19,6 @@ if __name__ == "__main__":
 		hostname = options.host,
 		password = options.password,
 		port = options.port,
-		debug = options.debug,
 	)
 	result = growl.register()
 	if result is not True: exit(result)
