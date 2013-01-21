@@ -1,9 +1,8 @@
 from optparse import OptionParser
 import logging
-import pydefaults
 import os
 
-from regrowl.server import *
+from regrowl.server import GNTPServer, GNTPHandler
 
 
 def store_path(option, opt, value, parser):
@@ -13,18 +12,17 @@ def store_path(option, opt, value, parser):
 class ServerParser(OptionParser):
     def __init__(self, domain='com.github.kfdm.gntp'):
         OptionParser.__init__(self)
-        self.settings = pydefaults.database(domain)
 
         # Network Options
         self.add_option("-a", "--address", help="address to listen on",
-                    dest="host", default=self.settings['host'])
+                    dest="host", default='localhost')
         self.add_option("-p", "--port", help="port to listen on",
-                    dest="port", type="int", default=self.settings['port'])
+                    dest="port", type="int", default=12345)
         self.add_option("-P", "--password", help="Network password",
-                    dest='password', default=self.settings['password'])
+                    dest='password')
 
         # Debug Options
-        self.add_option('-l', '--log', dest='log', default=self.settings['serverlog'],
+        self.add_option('-l', '--log', dest='log', default='server.log',
                     action='callback', callback=store_path, type=str)
         self.add_option('-v', '--verbose', dest='verbose', default=logging.INFO,
                     action='store_const', const=logging.DEBUG)
