@@ -1,4 +1,9 @@
 from gntp import *
+
+print '*'*80
+print dir()
+print '*'*80
+
 import urllib2
 import Growl
 import logging
