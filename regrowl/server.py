@@ -5,13 +5,23 @@
 
 import SocketServer
 import logging
+import platform
 
-import regrowl.bridge.gntp as gntp
+import gntp
+from gntp.errors import BaseError as GNTPError
+from regrowl.bridge.gntp import LocalNotifier
 
 
 __all__ = ['GNTPServer', 'GNTPHandler']
 
 logger = logging.getLogger('Server')
+
+def add_origin_info(packet):
+    packet.add_header('Origin-Machine-Name', platform.node())
+    packet.add_header('Origin-Software-Name', 'ReGrowl Server')
+    packet.add_header('Origin-Software-Version', '0.1')
+    packet.add_header('Origin-Platform-Name', platform.system())
+    packet.add_header('Origin-Platform-Version', platform.platform())
 
 
 class GNTPServer(SocketServer.TCPServer):
@@ -22,7 +32,7 @@ class GNTPServer(SocketServer.TCPServer):
             logger.critical('There is already a server running on port %d', options.port)
             exit(1)
         self.options = options
-        logging.getLogger('Server').info('Activating server')
+        logger.info('Activating server')
 
     def run(self):
         try:
@@ -39,40 +49,35 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
         buffer = ''
         while(1):
             data = self.request.recv(bufferLength)
-            logging.getLogger('Server').debug('Reading %s Bytes', len(data))
+            logger.debug('Reading %s Bytes', len(data))
             buffer = buffer + data
             if len(data) < bufferLength and buffer.endswith('\r\n\r\n'):
                 break
-        logging.getLogger('Server').debug(buffer)
+        logger.debug(buffer)
         return buffer
 
     def write(self, msg):
-        logging.getLogger('Server').debug(msg)
+        logger.debug(msg)
         self.request.sendall(msg)
 
     def handle(self):
-        logger = logging.getLogger('Server')
-        reload(gntp)
         self.data = self.read()
 
         try:
             message = gntp.parse_gntp(self.data, self.server.options.password)
 
             response = gntp.GNTPOK(action=message.info['messagetype'])
+            add_origin_info(response)
+
             if message.info['messagetype'] == 'NOTICE':
                 response.add_header('Notification-ID', '')
             elif message.info['messagetype'] == 'SUBSCRIBE':
-                raise gntp.UnsupportedError()
+                raise GNTPError("Unsupported")
                 #response.add_header('Subscription-TTL','10')
             self.write(response.encode())
-        except gntp.BaseError, e:
+        except GNTPError, e:
             logger.exception('GNTP Error')
-            if e.gntp_error:
-                self.write(e.gntp_error())
         except:
             logger.exception('Unknown Error')
-            error = gntp.GNTPError(errorcode=500, errordesc='Unknown server error')
-            self.write(error.encode())
-            raise
-
-        message.send()
+        else:
+            message.send()
