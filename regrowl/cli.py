@@ -44,16 +44,8 @@ def main():
         setproctitle.setproctitle('regrowl-server')
     except ImportError:
         pass
-    logging.basicConfig(level=logging.DEBUG,
-        format='%(name)-12s: %(levelname)-8s %(message)s',
-        datefmt='%m-%d %H:%M',
-        filename=options.log)
 
-    console = logging.StreamHandler()
-    console.setLevel(options.verbose)
-    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-    console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
+    logging.basicConfig(level=options.verbose)
 
     server = GNTPServer(options, GNTPHandler)
     server.run()
