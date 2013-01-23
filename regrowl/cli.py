@@ -50,7 +50,7 @@ def main():
         filename=options.log)
 
     console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
+    console.setLevel(options.verbose)
     formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
