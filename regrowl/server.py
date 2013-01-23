@@ -9,8 +9,7 @@ import platform
 
 import gntp
 from gntp.errors import BaseError as GNTPError
-from regrowl.bridge.gntp import LocalNotifier
-
+from regrowl.bridge import load_bridges
 
 __all__ = ['GNTPServer', 'GNTPHandler']
 
@@ -36,6 +35,8 @@ class GNTPServer(SocketServer.TCPServer):
             exit(1)
         self.options = options
         logger.info('Activating server')
+
+        self.notifiers = load_bridges()
 
     def run(self):
         try:
@@ -85,4 +86,6 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             logger.exception('Unknown Error')
             return
 
-        print "Processing message"
+        for module in self.server.notifiers:
+            reload(module)
+            module.LocalNotifier(message)
