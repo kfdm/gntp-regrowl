@@ -14,7 +14,10 @@ from regrowl.bridge.gntp import LocalNotifier
 
 __all__ = ['GNTPServer', 'GNTPHandler']
 
-logger = logging.getLogger('Server')
+logger = logging.getLogger(__name__)
+
+SPACER = 'x' * 80
+
 
 def add_origin_info(packet):
     packet.add_header('Origin-Machine-Name', platform.node())
@@ -53,11 +56,11 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             buffer = buffer + data
             if len(data) < bufferLength and buffer.endswith('\r\n\r\n'):
                 break
-        logger.debug(buffer)
+        logger.debug('Incoming Request\n%s\n%s\n%s', SPACER, buffer, SPACER)
         return buffer
 
     def write(self, msg):
-        logger.debug(msg)
+        logger.debug('Outgoing Response\n%s\n%s\n%s', SPACER, msg, SPACER)
         self.request.sendall(msg)
 
     def handle(self):
@@ -72,12 +75,14 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             if message.info['messagetype'] == 'NOTICE':
                 response.add_header('Notification-ID', '')
             elif message.info['messagetype'] == 'SUBSCRIBE':
-                raise GNTPError("Unsupported")
-                #response.add_header('Subscription-TTL','10')
+                response.add_header('Subscription-TTL', '10')
+
             self.write(response.encode())
-        except GNTPError, e:
+        except GNTPError:
             logger.exception('GNTP Error')
+            return
         except:
             logger.exception('Unknown Error')
-        else:
-            message.send()
+            return
+
+        print "Processing message"
