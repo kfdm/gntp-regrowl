@@ -30,12 +30,6 @@ class ReGrowler(object):
             self.notifications = []
         logger.info('Notification Name: %s', self.notifications)
 
-        if packet.headers.get('Notification-Icon'):
-            resource = packet.headers['Notification-Icon']
-            self.icon = self.get_resource(packet, resource)
-        else:
-            self.icon = None
-
         logger.debug('%s', packet.headers)
 
         self.growler = self.instance(packet)

@@ -27,10 +27,16 @@ class LocalNotifier(ReGrowler):
         self.growler.register()
 
     def notify(self, packet):
+        if packet.headers.get('Notification-Icon'):
+            resource = packet.headers['Notification-Icon']
+            icon = self.get_resource(packet, resource)
+        else:
+            icon = None
+
         logger.info('Sending notification to local machine')
         self.growler.notify(
             noteType=packet.headers['Notification-Name'],
             title=packet.headers['Notification-Title'],
             description=packet.headers['Notification-Name'],
-            icon=self.icon
+            icon=icon
         )
