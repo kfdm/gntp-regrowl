@@ -26,27 +26,6 @@ def add_origin_info(packet):
     packet.add_header('Origin-Platform-Version', platform.platform())
 
 
-class GNTPServer(SocketServer.TCPServer):
-    def __init__(self, options, RequestHandlerClass):
-        try:
-            SocketServer.TCPServer.__init__(self, (options.host, options.port), RequestHandlerClass)
-        except:
-            logger.critical('There is already a server running on port %d', options.port)
-            exit(1)
-        self.options = options
-        logger.info('Activating server')
-
-        self.notifiers = load_bridges()
-
-    def run(self):
-        try:
-            sa = self.socket.getsockname()
-            logger.info('Listening for GNTP on %s port %s', sa[0], sa[1])
-            self.serve_forever()
-        except KeyboardInterrupt:
-            self.__serving = False
-
-
 class GNTPHandler(SocketServer.StreamRequestHandler):
     def read(self):
         bufferLength = 2048
@@ -89,3 +68,26 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
         for module in self.server.notifiers:
             reload(module)
             module.LocalNotifier(message)
+
+
+class GNTPServer(SocketServer.TCPServer):
+    def __init__(self, options, config):
+        try:
+            SocketServer.TCPServer.__init__(self, (options.host, options.port), GNTPHandler)
+        except:
+            logger.exception('There is already a server running on port %d', options.port)
+            exit(1)
+
+        logger.info('Loading Server')
+        self.config = config
+        self.options = options
+        self.notifiers = load_bridges()
+
+    def run(self):
+        logger.info('Starting Server')
+        try:
+            sa = self.socket.getsockname()
+            logger.info('Listening for GNTP on %s port %s', sa[0], sa[1])
+            self.serve_forever()
+        except KeyboardInterrupt:
+            self.__serving = False

@@ -1,43 +1,81 @@
 from optparse import OptionParser
+from ConfigParser import SafeConfigParser
 import logging
 import os
 
-from regrowl.server import GNTPServer, GNTPHandler
+from regrowl.server import GNTPServer
 
 
-def store_path(option, opt, value, parser):
-    setattr(parser.values, option.dest, os.path.realpath(value))
+CONFIG_PATH = [
+    os.path.expanduser('~/.regrowl'),
+    '.regrowl'
+    ]
+
+DEFAULTS = {
+    'host': '0.0.0.0',
+    'port': 12345,
+    'password': None,
+}
 
 
-class ServerParser(OptionParser):
-    def __init__(self, domain='com.github.kfdm.gntp'):
+class ParserWithConfig(OptionParser):
+    def __init__(self, config):
         OptionParser.__init__(self)
+        self.config = SafeConfigParser(DEFAULTS)
+        self.config.read(CONFIG_PATH)
 
-        # Network Options
-        self.add_option("-a", "--address", help="address to listen on",
-                    dest="host", default='localhost')
-        self.add_option("-p", "--port", help="port to listen on",
-                    dest="port", type="int", default=12345)
-        self.add_option("-P", "--password", help="Network password",
-                    dest='password')
+        if not self.config.has_section('regrowl.server'):
+            self.config.add_section('regrowl.server')
 
-        # Debug Options
-        self.add_option('-l', '--log', dest='log', default='server.log',
-                    action='callback', callback=store_path, type=str)
-        self.add_option('-v', '--verbose', dest='verbose', default=logging.INFO,
-                    action='store_const', const=logging.DEBUG)
-        self.add_option("-d", "--debug", help="Print raw growl packets",
-                    dest='debug', action="store_true", default=False)
-        self.add_option("-q", "--quiet", help="Quiet mode",
-                    dest='debug', action="store_false")
+    def add_default_option(self, *args, **kwargs):
+        # Map the correct config.get* to the type of option being added
+        fun = {
+            'int': self.config.getint,
+            None: self.config.get,
+        }.get(kwargs.get('type'))
 
-    def parse_args(self, args=None, values=None):
-        values, args = OptionParser.parse_args(self, args, values)
-        return values, args
+        kwargs['default'] = fun('regrowl.server', kwargs.get('dest'))
+
+        self.add_option(*args, **kwargs)
 
 
 def main():
-    (options, args) = ServerParser().parse_args()
+    parser = ParserWithConfig(CONFIG_PATH)
+    parser.add_default_option(
+        "-a", "--address",
+        help="address to listen on",
+        dest="host"
+        )
+    parser.add_default_option("-p", "--port",
+        help="port to listen on",
+        dest="port",
+        type="int"
+        )
+    parser.add_default_option("-P", "--password",
+        help="Network password",
+        dest='password'
+        )
+
+    # Debug Options
+    parser.add_option('-v', '--verbose',
+        dest='verbose',
+        default=logging.INFO,
+        action='store_const',
+        const=logging.DEBUG
+        )
+    parser.add_option("-d", "--debug",
+        help="Print raw growl packets",
+        dest='debug',
+        action="store_true",
+        default=False
+        )
+    parser.add_option("-q", "--quiet",
+        help="Quiet mode",
+        dest='debug',
+        action="store_false"
+        )
+
+    (options, args) = parser.parse_args()
 
     try:
         import setproctitle
@@ -47,7 +85,7 @@ def main():
 
     logging.basicConfig(level=options.verbose)
 
-    server = GNTPServer(options, GNTPHandler)
+    server = GNTPServer(options, parser.config)
     server.run()
 
 if __name__ == "__main__":
