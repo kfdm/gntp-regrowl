@@ -11,12 +11,12 @@ class ReGrowler(object):
         self.srcport = srcport
 
         if packet.info['messagetype'] not in self.valid:
-            logger.warning('%s cannot decode %s',
-                self, packet.info['messagetype'])
+            logger.warning('<%s> cannot decode %s',
+                self.__module__, packet.info['messagetype'])
             return
 
-        # Every packet has an application name
-        self.applicationName = packet.headers['Application-Name']
+        # Registration and notification packets have Application-Name
+        self.applicationName = packet.headers.get('Application-Name')
         logger.info('Application Name: %s', self.applicationName)
 
         # Pull out the notification type(s)
@@ -26,6 +26,8 @@ class ReGrowler(object):
             self.notifications = []
             for name in packet.notifications:
                 self.notifications.append(name['Notification-Name'])
+        else:
+            self.notifications = []
         logger.info('Notification Name: %s', self.notifications)
 
         if packet.headers.get('Notification-Icon'):
@@ -40,6 +42,7 @@ class ReGrowler(object):
         {
             'REGISTER': self.register,
             'NOTIFY': self.notify,
+            'SUBSCRIBE': self.subscribe,
         }.get(packet.info['messagetype'])(packet)
 
     def get_resource(self, packet, resource):
@@ -66,4 +69,7 @@ class ReGrowler(object):
         raise NotImplementedError()
 
     def notify(self, packet):
+        raise NotImplementedError()
+
+    def subscribe(self, packet):
         raise NotImplementedError()
