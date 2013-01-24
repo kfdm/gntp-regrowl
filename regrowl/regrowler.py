@@ -5,8 +5,10 @@ logger = logging.getLogger(__name__)
 
 
 class ReGrowler(object):
-    def __init__(self, packet):
-        logger.info('Decoding Packet %s', packet.info['messagetype'])
+    def __init__(self, packet, srcaddr, srcport):
+        self.srcpacket = packet
+        self.srcaddr = srcaddr
+        self.srcport = srcport
 
         if packet.info['messagetype'] not in self.valid:
             logger.warning('%s cannot decode %s',

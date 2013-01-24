@@ -44,6 +44,9 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
         self.request.sendall(msg)
 
     def handle(self):
+        self.hostaddr, self.port = self.request.getsockname()
+        logger.info('Handling request from %s:%s', self.hostaddr, self.port)
+
         self.data = self.read()
 
         try:
@@ -67,7 +70,7 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
 
         for module in self.server.notifiers:
             reload(module)
-            module.LocalNotifier(message)
+            module.LocalNotifier(message, self.hostaddr, self.port)
 
 
 class GNTPServer(SocketServer.TCPServer):
@@ -75,7 +78,7 @@ class GNTPServer(SocketServer.TCPServer):
         try:
             SocketServer.TCPServer.__init__(self, (options.host, options.port), GNTPHandler)
         except:
-            logger.exception('There is already a server running on port %d', options.port)
+            logger.critical('There is already a server running on port %d', options.port)
             exit(1)
 
         logger.info('Loading Server')
