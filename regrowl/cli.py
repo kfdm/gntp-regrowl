@@ -83,7 +83,8 @@ def main():
     except ImportError:
         pass
 
-    logging.basicConfig(level=options.verbose)
+    logging.basicConfig(level=options.verbose,
+        format="%(name)-25s %(levelname)s:%(message)s")
 
     server = GNTPServer(options, parser.config)
     server.run()
