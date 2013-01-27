@@ -18,7 +18,7 @@ SEARCHPATH = os.path.join(MODULE_PATH, '*.py')
 BLACKLIST = ['__init__']
 
 
-def load_bridges():
+def load_bridges(options):
     bridges = []
     for module in glob.glob(SEARCHPATH):
         # Get just the module name without the directory or .py
@@ -36,8 +36,11 @@ def load_bridges():
         except ImportError:
             logger.error('Unable to import %s', module)
         else:
-            logger.info('Loaded %s module', mod.__name__)
-            bridges.append(mod)
+            if options.getboolean(module, 'enabled', True):
+                logger.info('Loaded %s module', mod.__name__)
+                bridges.append(mod)
+            else:
+                logger.info('Disabled %s module', mod.__name__)
         finally:
             if _fp:
                 _fp.close()

@@ -1,5 +1,5 @@
 from optparse import OptionParser
-from ConfigParser import SafeConfigParser
+from ConfigParser import RawConfigParser
 import logging
 import os
 
@@ -18,14 +18,30 @@ DEFAULTS = {
 }
 
 
+class DefaultConfig(RawConfigParser):
+    def __init__(self, *args, **kwargs):
+        RawConfigParser.__init__(self, *args, **kwargs)
+        if not self.has_section('regrowl.server'):
+            self.add_section('regrowl.server')
+
+        self.get = self._wrap_default(self.get)
+        self.getint = self._wrap_default(self.getint)
+        self.getboolean = self._wrap_default(self.getboolean)
+
+    def _wrap_default(self, function):
+        def _wrapper(section, option, default=None):
+            try:
+                return function(section, option)
+            except:
+                return default
+        return _wrapper
+
+
 class ParserWithConfig(OptionParser):
     def __init__(self, config):
         OptionParser.__init__(self)
-        self.config = SafeConfigParser(DEFAULTS)
+        self.config = DefaultConfig(DEFAULTS)
         self.config.read(CONFIG_PATH)
-
-        if not self.config.has_section('regrowl.server'):
-            self.config.add_section('regrowl.server')
 
     def add_default_option(self, *args, **kwargs):
         # Map the correct config.get* to the type of option being added

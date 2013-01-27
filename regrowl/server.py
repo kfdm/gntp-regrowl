@@ -84,7 +84,7 @@ class GNTPServer(SocketServer.TCPServer):
         logger.info('Loading Server')
         self.config = config
         self.options = options
-        self.notifiers = load_bridges()
+        self.notifiers = load_bridges(self.config)
 
     def run(self):
         logger.info('Starting Server')
