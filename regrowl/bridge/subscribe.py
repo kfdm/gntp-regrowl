@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from regrowl.regrowler import ReGrowler
 
 
-class LocalNotifier(ReGrowler):
+class SubscribelNotifier(ReGrowler):
     valid = ['SUBSCRIBE']
 
     def instance(self, packet):

@@ -10,10 +10,10 @@ import regrowl.extras.netgrowl as netgrowl
 logger = logging.getLogger(__name__)
 
 
-__all__ = ['LocalNotifier']
+__all__ = ['UDPNotifier']
 
 
-class LocalNotifier(ReGrowler):
+class UDPNotifier(ReGrowler):
     valid = ['REGISTER', 'NOTIFY']
 
     def _send(self, payload):
