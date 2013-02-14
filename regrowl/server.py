@@ -68,9 +68,12 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             logger.exception('Unknown Error')
             return
 
-        for module in self.server.notifiers:
-            reload(module)
-            module.LocalNotifier(message, self.hostaddr, self.port)
+        if self.server.options.debug:
+            logger.info('Reloading bridges')
+            self.server.notifiers = load_bridges(self.server.config)
+
+        for bridge in self.server.notifiers:
+            bridge(message, self.hostaddr, self.port)
 
 
 class GNTPServer(SocketServer.TCPServer):
