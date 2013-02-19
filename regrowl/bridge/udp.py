@@ -1,3 +1,9 @@
+"""
+Simple Growl UDP Bridge
+
+Converts a TCP GNTP notification to the old UDP Growl format
+"""
+
 from __future__ import absolute_import
 
 import logging

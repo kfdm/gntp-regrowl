@@ -1,3 +1,10 @@
+"""
+Send notification with legacy growl library
+
+Uses the legacy growl bindings to send a growl notification.
+Useful for older versions of OSX
+"""
+
 from __future__ import absolute_import
 
 import Growl
