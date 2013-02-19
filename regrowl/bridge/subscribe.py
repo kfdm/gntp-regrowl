@@ -3,6 +3,7 @@ from regrowl.regrowler import ReGrowler
 
 
 class SubscribelNotifier(ReGrowler):
+    key = __name__
     valid = ['SUBSCRIBE']
 
     def instance(self, packet):

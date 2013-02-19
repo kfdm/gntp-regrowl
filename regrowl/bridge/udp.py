@@ -14,6 +14,7 @@ __all__ = ['UDPNotifier']
 
 
 class UDPNotifier(ReGrowler):
+    key = __name__
     valid = ['REGISTER', 'NOTIFY']
 
     def _send(self, payload):

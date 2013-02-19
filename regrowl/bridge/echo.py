@@ -12,6 +12,7 @@ __all__ = ['EchoNotifier']
 
 
 class EchoNotifier(ReGrowler):
+    key = __name__
     valid = ['REGISTER', 'NOTIFY']
 
     def instance(self, packet):

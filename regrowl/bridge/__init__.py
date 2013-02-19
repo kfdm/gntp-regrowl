@@ -39,15 +39,15 @@ def load_bridges(options):
         except ImportError:
             logger.error('Unable to import %s', module)
         else:
-            if not options.getboolean(module, 'enabled', True):
-                logger.info('Disabled %s module', mod.__name__)
-                continue
-
-            logger.info('Loading %s module', mod.__name__)
+            logger.info('Scanning %s module', mod.__name__)
             for name, obj in inspect.getmembers(mod):
                 if inspect.isclass(obj) and \
                 issubclass(obj, ReGrowler) and \
                 obj is not ReGrowler:
+                    if not options.getboolean(obj.key, 'enabled', True):
+                        logger.info('Skipping %s', name)
+                        continue
+                    logger.info('Loaded %s', name)
                     bridges.append(obj)
 
         finally:
