@@ -3,6 +3,9 @@ Send notification with legacy growl library
 
 Uses the legacy growl bindings to send a growl notification.
 Useful for older versions of OSX
+
+Easiest way to install old bindings is probably through Pip
+http://pypi.python.org/pypi/growl-py/0.0.7
 """
 
 from __future__ import absolute_import
