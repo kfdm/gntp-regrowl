@@ -75,9 +75,8 @@ def main():
     # Debug Options
     parser.add_option('-v', '--verbose',
         dest='verbose',
-        default=logging.INFO,
-        action='store_const',
-        const=logging.DEBUG
+        default=0,
+        action='count',
         )
     parser.add_option("-d", "--debug",
         help="Print raw growl packets",
@@ -92,6 +91,7 @@ def main():
         )
 
     (options, args) = parser.parse_args()
+    options.verbose = logging.WARNING - options.verbose * 10
 
     try:
         import setproctitle

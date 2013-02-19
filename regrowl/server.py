@@ -17,6 +17,15 @@ logger = logging.getLogger(__name__)
 
 SPACER = 'x' * 80
 
+TRACE = 1
+
+
+def _trace(self, msg, *args, **kwargs):
+    self.log(TRACE, msg, *args, **kwargs)
+
+logging.addLevelName(TRACE, 'TRACE')
+logging.Logger.trace = _trace
+
 
 def add_origin_info(packet):
     packet.add_header('Origin-Machine-Name', platform.node())
@@ -36,11 +45,11 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             buffer = buffer + data
             if len(data) < bufferLength and buffer.endswith('\r\n\r\n'):
                 break
-        logger.debug('Incoming Request\n%s\n%s\n%s', SPACER, buffer, SPACER)
+        logger.trace('Incoming Request\n%s\n%s\n%s', SPACER, buffer, SPACER)
         return buffer
 
     def write(self, msg):
-        logger.debug('Outgoing Response\n%s\n%s\n%s', SPACER, msg, SPACER)
+        logger.trace('Outgoing Response\n%s\n%s\n%s', SPACER, msg, SPACER)
         self.request.sendall(msg)
 
     def handle(self):
