@@ -7,7 +7,7 @@ import SocketServer
 import logging
 import platform
 
-import gntp
+from gntp.core import parse_gntp, GNTPOK
 from gntp.errors import BaseError as GNTPError
 from regrowl.bridge import load_bridges
 
@@ -59,9 +59,9 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
         self.data = self.read()
 
         try:
-            message = gntp.parse_gntp(self.data, self.server.options.password)
+            message = parse_gntp(self.data, self.server.options.password)
 
-            response = gntp.GNTPOK(action=message.info['messagetype'])
+            response = GNTPOK(action=message.info['messagetype'])
             add_origin_info(response)
 
             if message.info['messagetype'] == 'NOTICE':

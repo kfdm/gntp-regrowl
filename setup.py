@@ -6,7 +6,11 @@ setup(
     author='Paul Traylor',
     url='https://github.com/kfdm/gntp-regrowl',
     version='0.0.1',
-    packages=['regrowl'],
+    packages=[
+        'regrowl',
+        'regrowl.bridge',
+        'regrowl.extras',
+    ],
     # http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -19,6 +23,7 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
     install_requires=[
+        'gntp',
         'growl-py',
         ],
     entry_points={
