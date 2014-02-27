@@ -81,6 +81,8 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             return
 
         if self.server.options.debug:
+            logger.info('Reloading config')
+            self.server.config.read([self.server.options.config])
             logger.info('Reloading bridges')
             self.server.notifiers = load_bridges(self.server.config)
 

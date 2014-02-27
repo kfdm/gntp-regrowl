@@ -1,98 +1,90 @@
-from optparse import OptionParser
-from ConfigParser import RawConfigParser
+import argparse
+import ConfigParser
 import logging
 import os
 
 from regrowl.server import GNTPServer
 
 
-CONFIG_PATH = [
-    os.path.expanduser('~/.regrowl'),
-    '.regrowl'
-    ]
-
 DEFAULTS = {
     'host': '0.0.0.0',
-    'port': 12345,
+    'port': 23053,
     'password': None,
     'timeout': 600,
     'bufferLength': 2048,
 }
 
-
-class DefaultConfig(RawConfigParser):
-    def __init__(self, *args, **kwargs):
-        RawConfigParser.__init__(self, *args, **kwargs)
-        if not self.has_section('regrowl.server'):
-            self.add_section('regrowl.server')
-
-        self.get = self._wrap_default(self.get)
-        self.getint = self._wrap_default(self.getint)
-        self.getboolean = self._wrap_default(self.getboolean)
-
-    def _wrap_default(self, function):
-        def _wrapper(section, option, default=None):
-            try:
-                return function(section, option)
-            except:
-                return default
-        return _wrapper
-
-
-class ParserWithConfig(OptionParser):
-    def __init__(self, config):
-        OptionParser.__init__(self)
-        self.config = DefaultConfig(DEFAULTS)
-        self.config.read(CONFIG_PATH)
-
-    def add_default_option(self, *args, **kwargs):
-        # Map the correct config.get* to the type of option being added
-        fun = {
-            'int': self.config.getint,
-            None: self.config.get,
-        }.get(kwargs.get('type'))
-
-        kwargs['default'] = fun('regrowl.server', kwargs.get('dest'))
-
-        self.add_option(*args, **kwargs)
+config = ConfigParser.RawConfigParser(DEFAULTS)
+# Ensuring this section always exists, makes our later
+# logic easier. Since we're not saving over the config
+# file this should be reasonably safe
+if not config.has_section('regrowl.server'):
+    config.add_section('regrowl.server')
 
 
 def main():
-    parser = ParserWithConfig(CONFIG_PATH)
-    parser.add_default_option(
-        "-a", "--address",
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c", "--config",
+        help="Config File",
+        default=os.path.expanduser('~/.regrowl'),
+    )
+
+    args, _ = parser.parse_known_args()
+    config.read(args.config)
+
+    parser.add_argument(
+        "-a",
+        "--address",
         help="address to listen on",
-        dest="host"
-        )
-    parser.add_default_option("-p", "--port",
+        dest="host",
+        default=config.get('regrowl.server', 'host')
+    )
+
+    parser.add_argument(
+        "-p",
+        "--port",
         help="port to listen on",
         dest="port",
-        type="int"
-        )
-    parser.add_default_option("-P", "--password",
+        type=int,
+        default=config.getint('regrowl.server', 'port')
+    )
+
+    parser.add_argument(
+        "-P",
+        "--password",
         help="Network password",
-        dest='password'
-        )
+        dest='password',
+        default=config.get('regrowl.server', 'password')
+    )
 
     # Debug Options
-    parser.add_option('-v', '--verbose',
+    parser.add_argument(
+        '-v',
+        '--verbose',
         dest='verbose',
         default=0,
         action='count',
-        )
-    parser.add_option("-d", "--debug",
+    )
+
+    parser.add_argument(
+        "-d",
+        "--debug",
         help="Print raw growl packets",
         dest='debug',
         action="store_true",
-        default=False
-        )
-    parser.add_option("-q", "--quiet",
+        default=False,
+    )
+
+    parser.add_argument(
+        "-q",
+        "--quiet",
         help="Quiet mode",
         dest='debug',
         action="store_false"
-        )
+    )
 
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
     options.verbose = logging.WARNING - options.verbose * 10
 
     try:
@@ -101,10 +93,12 @@ def main():
     except ImportError:
         pass
 
-    logging.basicConfig(level=options.verbose,
-        format="%(name)-25s %(levelname)s:%(message)s")
+    logging.basicConfig(
+        level=options.verbose,
+        format="%(name)-25s %(levelname)s:%(message)s"
+    )
 
-    server = GNTPServer(options, parser.config)
+    server = GNTPServer(options, config)
     server.run()
 
 if __name__ == "__main__":
