@@ -64,7 +64,7 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             response = GNTPOK(action=message.info['messagetype'])
             add_origin_info(response)
 
-            if message.info['messagetype'] == 'NOTICE':
+            if message.info['messagetype'] == 'NOTIFY':
                 response.add_header('Notification-ID', '')
             elif message.info['messagetype'] == 'SUBSCRIBE':
                 response.add_header('Subscription-TTL', '10')
