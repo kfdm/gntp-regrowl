@@ -29,24 +29,26 @@ def load_bridges(options):
         if module in BLACKLIST:
             continue
 
+        package = '{0}.{1}'.format(__package__, module)
+        if not options.has_section(package):
+            logger.info('Skipping %s. Not Enabled', package)
+            continue
+
         try:
             # We use the short name of the module with the search path
             _fp, _pathname, _description = imp.find_module(module, [MODULE_PATH])
             # And then add back the __package__ part so that it acts a
             # bit more like a "proper" module
-            module = '{0}.{1}'.format(__package__, module)
-            mod = imp.load_module(module, _fp, _pathname, _description)
+
+            mod = imp.load_module(package, _fp, _pathname, _description)
         except ImportError:
-            logger.error('Unable to import %s', module)
+            logger.error('Unable to import %s', package)
         else:
             logger.info('Scanning %s module', mod.__name__)
             for name, obj in inspect.getmembers(mod):
                 if inspect.isclass(obj) and \
-                issubclass(obj, ReGrowler) and \
-                obj is not ReGrowler:
-                    if not options.getboolean(obj.key, 'enabled', True):
-                        logger.info('Skipping %s', name)
-                        continue
+                        issubclass(obj, ReGrowler) and \
+                        obj is not ReGrowler:
                     logger.info('Loaded %s', name)
                     bridges.append(obj)
 
