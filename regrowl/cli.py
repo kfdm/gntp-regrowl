@@ -14,7 +14,14 @@ DEFAULTS = {
     'bufferLength': 2048,
 }
 
-config = ConfigParser.RawConfigParser(DEFAULTS)
+
+class ReloadableConfig(ConfigParser.RawConfigParser):
+    def reload(self, path):
+        config = ReloadableConfig(self.defaults())
+        config.read(path)
+        return config
+
+config = ReloadableConfig(DEFAULTS)
 # Ensuring this section always exists, makes our later
 # logic easier. Since we're not saving over the config
 # file this should be reasonably safe
