@@ -15,6 +15,8 @@ DEFAULTS = {
     'host': '0.0.0.0',
     'port': 12345,
     'password': None,
+    'timeout': 600,
+    'bufferLength': 2048,
 }
 
 
