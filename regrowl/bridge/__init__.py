@@ -41,8 +41,8 @@ def load_bridges(options):
             # bit more like a "proper" module
 
             mod = imp.load_module(package, _fp, _pathname, _description)
-        except ImportError:
-            logger.error('Unable to import %s', package)
+        except ImportError, e:
+            logger.error('Unable to import %s: %s', package, e)
         else:
             logger.info('Scanning %s module', mod.__name__)
             for name, obj in inspect.getmembers(mod):

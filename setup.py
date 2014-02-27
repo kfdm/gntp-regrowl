@@ -24,7 +24,6 @@ setup(
     ],
     install_requires=[
         'gntp',
-        'growl-py',
         ],
     entry_points={
         'console_scripts': [
