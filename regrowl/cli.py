@@ -23,7 +23,7 @@ if not config.has_section('regrowl.server'):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument(
         "-c", "--config",
         help="Config File",
@@ -33,6 +33,9 @@ def main():
     args, _ = parser.parse_known_args()
     config.read(args.config)
 
+    # Redefine our parser so that -h works with the entire
+    # list of options
+    parser = argparse.ArgumentParser(parents=[parser])
     parser.add_argument(
         "-a",
         "--address",
@@ -68,20 +71,12 @@ def main():
     )
 
     parser.add_argument(
-        "-d",
-        "--debug",
-        help="Print raw growl packets",
-        dest='debug',
+        "-r",
+        "--reload",
+        help="Auto reload config and bridges (Useful for development)",
+        dest='reload',
         action="store_true",
         default=False,
-    )
-
-    parser.add_argument(
-        "-q",
-        "--quiet",
-        help="Quiet mode",
-        dest='debug',
-        action="store_false"
     )
 
     options = parser.parse_args()

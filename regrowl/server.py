@@ -80,7 +80,7 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             logger.exception('Unknown Error')
             return
 
-        if self.server.options.debug:
+        if self.server.options.reload:
             logger.info('Reloading config')
             self.server.config.read([self.server.options.config])
             logger.info('Reloading bridges')
