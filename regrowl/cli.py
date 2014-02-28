@@ -1,32 +1,9 @@
 import argparse
-import ConfigParser
 import logging
 import os
 
 from regrowl.server import GNTPServer
-
-
-DEFAULTS = {
-    'host': '0.0.0.0',
-    'port': 23053,
-    'password': None,
-    'timeout': 600,
-    'bufferLength': 2048,
-}
-
-
-class ReloadableConfig(ConfigParser.RawConfigParser):
-    def reload(self, path):
-        config = ReloadableConfig(self.defaults())
-        config.read(path)
-        return config
-
-config = ReloadableConfig(DEFAULTS)
-# Ensuring this section always exists, makes our later
-# logic easier. Since we're not saving over the config
-# file this should be reasonably safe
-if not config.has_section('regrowl.server'):
-    config.add_section('regrowl.server')
+from regrowl.config import ReloadableConfig, DEFAULTS
 
 
 def main():
@@ -38,6 +15,7 @@ def main():
     )
 
     args, _ = parser.parse_known_args()
+    config = ReloadableConfig(DEFAULTS)
     config.read(args.config)
 
     # Redefine our parser so that -h works with the entire
