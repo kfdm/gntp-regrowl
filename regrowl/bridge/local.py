@@ -27,7 +27,6 @@ __all__ = ['LocalNotifier']
 
 
 class LocalNotifier(ReGrowler):
-    key = __name__
     valid = ['REGISTER', 'NOTIFY']
 
     def instance(self, packet):

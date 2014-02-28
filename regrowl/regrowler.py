@@ -66,3 +66,12 @@ class ReGrowler(object):
 
     def subscribe(self, packet):
         raise NotImplementedError()
+
+    def get(self, key, default=None):
+        return self.config.get(self.__module__, key, default)
+
+    def getint(self, key, default=None):
+        return self.config.getint(self.__module__, key, default)
+
+    def getboolean(self, key, default=None):
+        return self.config.getboolean(self.__module__, key, default)

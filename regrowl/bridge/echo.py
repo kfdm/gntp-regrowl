@@ -23,7 +23,6 @@ SPACER = '=' * 80
 
 
 class EchoNotifier(ReGrowler):
-    key = __name__
     valid = ['REGISTER', 'NOTIFY']
 
     def instance(self, packet):
@@ -32,7 +31,7 @@ class EchoNotifier(ReGrowler):
     def register(self, packet):
         logger.info('Register')
         print 'Registration Packet:'
-        if self.config.getboolean(self.key, 'verbose', False):
+        if self.getboolean('verbose', False):
             print SPACER
             print packet
             print SPACER
@@ -42,7 +41,7 @@ class EchoNotifier(ReGrowler):
     def notify(self, packet):
         logger.info('Notify')
         print 'Notification Packet:'
-        if self.config.getboolean(self.key, 'verbose', False):
+        if self.getboolean('verbose', False):
             print SPACER
             print packet
             print SPACER
