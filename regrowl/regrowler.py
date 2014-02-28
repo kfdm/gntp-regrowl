@@ -5,13 +5,15 @@ logger = logging.getLogger(__name__)
 
 
 class ReGrowler(object):
-    def __init__(self, packet, srcaddr, srcport):
+    def __init__(self, config, packet, srcaddr, srcport):
+        self.config = config
         self.srcpacket = packet
         self.srcaddr = srcaddr
         self.srcport = srcport
 
         if packet.info['messagetype'] not in self.valid:
-            logger.warning('<%s> cannot decode %s',
+            logger.warning(
+                '<%s> cannot decode %s',
                 self.__module__, packet.info['messagetype'])
             return
 
@@ -30,9 +32,7 @@ class ReGrowler(object):
             self.notifications = []
         logger.info('Notification Name: %s', self.notifications)
 
-        logger.debug('%s', packet.headers)
-
-        self.growler = self.instance(packet)
+        self.instance(packet)
         {
             'REGISTER': self.register,
             'NOTIFY': self.notify,
@@ -57,7 +57,7 @@ class ReGrowler(object):
             return None
 
     def instance(self, packet):
-        raise NotImplementedError()
+        pass
 
     def register(self, packet):
         raise NotImplementedError()
@@ -67,3 +67,12 @@ class ReGrowler(object):
 
     def subscribe(self, packet):
         raise NotImplementedError()
+
+    def get(self, key, default=None):
+        return self.config.get(self.__module__, key, default)
+
+    def getint(self, key, default=None):
+        return self.config.getint(self.__module__, key, default)
+
+    def getboolean(self, key, default=None):
+        return self.config.getboolean(self.__module__, key, default)

@@ -8,11 +8,7 @@ SPACER = '=' * 80
 
 
 class SubscribelNotifier(ReGrowler):
-    key = __name__
     valid = ['SUBSCRIBE']
-
-    def instance(self, packet):
-        return None
 
     def subscribe(self, packet):
         print SPACER

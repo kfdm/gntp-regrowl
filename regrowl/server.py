@@ -37,7 +37,7 @@ def add_origin_info(packet):
 
 class GNTPHandler(SocketServer.StreamRequestHandler):
     def read(self):
-        bufferLength = 2048
+        bufferLength = self.server.config.get('regrowl.server', 'bufferLength')
         buffer = ''
         while(1):
             data = self.request.recv(bufferLength)
@@ -64,10 +64,13 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             response = GNTPOK(action=message.info['messagetype'])
             add_origin_info(response)
 
-            if message.info['messagetype'] == 'NOTICE':
+            if message.info['messagetype'] == 'NOTIFY':
                 response.add_header('Notification-ID', '')
             elif message.info['messagetype'] == 'SUBSCRIBE':
-                response.add_header('Subscription-TTL', '10')
+                response.add_header(
+                    'Subscription-TTL',
+                    self.server.config.get('regrowl.server', 'timeout')
+                )
 
             self.write(response.encode())
         except GNTPError:
@@ -77,12 +80,17 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             logger.exception('Unknown Error')
             return
 
-        if self.server.options.debug:
+        if self.server.options.reload:
+            logger.info('Reloading config')
+            self.server.config = self.server.config.reload(
+                [self.server.options.config]
+            )
+
             logger.info('Reloading bridges')
             self.server.notifiers = load_bridges(self.server.config)
 
         for bridge in self.server.notifiers:
-            bridge(message, self.hostaddr, self.port)
+            bridge(self.server.config, message, self.hostaddr, self.port)
 
 
 class GNTPServer(SocketServer.TCPServer):

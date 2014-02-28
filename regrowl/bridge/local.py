@@ -10,7 +10,11 @@ http://pypi.python.org/pypi/growl-py/0.0.7
 
 from __future__ import absolute_import
 
-import Growl
+try:
+    import Growl
+except ImportError:
+    raise ImportError('Requires http://pypi.python.org/pypi/growl-py Please install from PyPi')
+
 import logging
 
 from regrowl.regrowler import ReGrowler
@@ -23,11 +27,10 @@ __all__ = ['LocalNotifier']
 
 
 class LocalNotifier(ReGrowler):
-    key = __name__
     valid = ['REGISTER', 'NOTIFY']
 
     def instance(self, packet):
-        return Growl.GrowlNotifier(
+        self.growler = Growl.GrowlNotifier(
             applicationName=self.applicationName,
             notifications=self.notifications,
             defaultNotifications=self.notifications

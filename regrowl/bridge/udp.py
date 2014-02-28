@@ -20,7 +20,6 @@ __all__ = ['UDPNotifier']
 
 
 class UDPNotifier(ReGrowler):
-    key = __name__
     valid = ['REGISTER', 'NOTIFY']
 
     def _send(self, payload):
@@ -28,13 +27,10 @@ class UDPNotifier(ReGrowler):
         s = socket(AF_INET, SOCK_DGRAM)
         s.sendto(payload, addr)
 
-    def instance(self, packet):
-        return None
-
     def register(self, packet):
         p = netgrowl.GrowlRegistrationPacket(
             application=packet.headers.get('Application-Name')
-            )
+        )
 
         for notification in packet.notifications:
             p.addNotification(notification.get('Notification-Name'))
@@ -48,7 +44,7 @@ class UDPNotifier(ReGrowler):
             notification=packet.headers.get('Notification-Name'),
             title=packet.headers['Notification-Title'],
             description=packet.headers['Notification-Name'],
-            )
+        )
 
         logger.info('Sending UDP notification')
         self._send(p.payload())
