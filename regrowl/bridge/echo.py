@@ -25,9 +25,6 @@ SPACER = '=' * 80
 class EchoNotifier(ReGrowler):
     valid = ['REGISTER', 'NOTIFY']
 
-    def instance(self, packet):
-        return None
-
     def register(self, packet):
         logger.info('Register')
         print 'Registration Packet:'

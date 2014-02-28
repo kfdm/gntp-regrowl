@@ -30,7 +30,7 @@ class LocalNotifier(ReGrowler):
     valid = ['REGISTER', 'NOTIFY']
 
     def instance(self, packet):
-        return Growl.GrowlNotifier(
+        self.growler = Growl.GrowlNotifier(
             applicationName=self.applicationName,
             notifications=self.notifications,
             defaultNotifications=self.notifications

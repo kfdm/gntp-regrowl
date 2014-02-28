@@ -12,7 +12,8 @@ class ReGrowler(object):
         self.srcport = srcport
 
         if packet.info['messagetype'] not in self.valid:
-            logger.warning('<%s> cannot decode %s',
+            logger.warning(
+                '<%s> cannot decode %s',
                 self.__module__, packet.info['messagetype'])
             return
 
@@ -31,7 +32,7 @@ class ReGrowler(object):
             self.notifications = []
         logger.info('Notification Name: %s', self.notifications)
 
-        self.growler = self.instance(packet)
+        self.instance(packet)
         {
             'REGISTER': self.register,
             'NOTIFY': self.notify,
@@ -56,7 +57,7 @@ class ReGrowler(object):
             return None
 
     def instance(self, packet):
-        raise NotImplementedError()
+        pass
 
     def register(self, packet):
         raise NotImplementedError()

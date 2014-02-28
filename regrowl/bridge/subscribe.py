@@ -10,9 +10,6 @@ SPACER = '=' * 80
 class SubscribelNotifier(ReGrowler):
     valid = ['SUBSCRIBE']
 
-    def instance(self, packet):
-        return None
-
     def subscribe(self, packet):
         print SPACER
         print self.srcaddr
