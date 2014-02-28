@@ -6,6 +6,7 @@ DEFAULTS = {
     'password': None,
     'timeout': 600,
     'bufferLength': 2048,
+    'passwordHash': 'SHA1',
 }
 
 
