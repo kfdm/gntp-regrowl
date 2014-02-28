@@ -31,8 +31,6 @@ class ReGrowler(object):
             self.notifications = []
         logger.info('Notification Name: %s', self.notifications)
 
-        logger.debug('%s', packet.headers)
-
         self.growler = self.instance(packet)
         {
             'REGISTER': self.register,
