@@ -5,7 +5,8 @@ logger = logging.getLogger(__name__)
 
 
 class ReGrowler(object):
-    def __init__(self, packet, srcaddr, srcport):
+    def __init__(self, config, packet, srcaddr, srcport):
+        self.config = config
         self.srcpacket = packet
         self.srcaddr = srcaddr
         self.srcport = srcport

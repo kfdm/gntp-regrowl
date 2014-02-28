@@ -90,7 +90,7 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             self.server.notifiers = load_bridges(self.server.config)
 
         for bridge in self.server.notifiers:
-            bridge(message, self.hostaddr, self.port)
+            bridge(self.server.config, message, self.hostaddr, self.port)
 
 
 class GNTPServer(SocketServer.TCPServer):
