@@ -75,7 +75,7 @@ def main():
 
     logging.basicConfig(
         level=options.verbose,
-        format="%(name)-25s %(levelname)s:%(message)s"
+        format="%(levelname)-7s %(name)-25s %(message)s"
     )
 
     server = GNTPServer(options, config)

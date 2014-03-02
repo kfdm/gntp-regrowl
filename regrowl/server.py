@@ -13,18 +13,19 @@ from regrowl.bridge import load_bridges
 
 __all__ = ['GNTPServer', 'GNTPHandler']
 
-logger = logging.getLogger(__name__)
-
 SPACER = 'x' * 80
 
 TRACE = 1
 
 
-def _trace(self, msg, *args, **kwargs):
-    self.log(TRACE, msg, *args, **kwargs)
+class RegrowlLogger(logging.Logger):
+    def trace(self, msg, *args, **kwargs):
+        if self.isEnabledFor(TRACE):
+            self._log(TRACE, msg, args, **kwargs)
 
 logging.addLevelName(TRACE, 'TRACE')
-logging.Logger.trace = _trace
+logging.setLoggerClass(RegrowlLogger)
+logger = logging.getLogger(__name__)
 
 
 def add_origin_info(packet):
