@@ -10,6 +10,7 @@ import platform
 from gntp.core import parse_gntp, GNTPOK
 from gntp.errors import BaseError as GNTPError
 from regrowl.bridge import load_bridges
+from regrowl.config import DEFAULTS
 
 __all__ = ['GNTPServer', 'GNTPHandler']
 
@@ -38,7 +39,7 @@ def add_origin_info(packet):
 
 class GNTPHandler(SocketServer.StreamRequestHandler):
     def read(self):
-        bufferLength = self.server.config.get('regrowl.server', 'bufferLength')
+        bufferLength = self.get('bufferLength', DEFAULTS['bufferLength'])
         buffer = ''
         while(1):
             data = self.request.recv(bufferLength)
@@ -70,7 +71,7 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             elif message.info['messagetype'] == 'SUBSCRIBE':
                 response.add_header(
                     'Subscription-TTL',
-                    self.server.config.get('regrowl.server', 'timeout')
+                    self.getint('timeout', DEFAULTS['timeout'])
                 )
 
             self.write(response.encode())
@@ -92,6 +93,15 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
 
         for bridge in self.server.notifiers:
             bridge(self.server.config, message, self.hostaddr, self.port)
+
+    def get(self, key, default=None):
+        return self.server.config.get(__name__, key, default)
+
+    def getint(self, key, default=None):
+        return self.server.config.getint(__name__, key, default)
+
+    def getboolean(self, key, default=None):
+        return self.server.config.getboolean(__name__, key, default)
 
 
 class GNTPServer(SocketServer.TCPServer):
