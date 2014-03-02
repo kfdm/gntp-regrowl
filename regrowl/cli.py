@@ -4,6 +4,7 @@ import os
 
 from regrowl.server import GNTPServer
 from regrowl.config import ReloadableConfig, DEFAULTS
+from regrowl.test import test_client, TEST_OPTIONS
 
 
 def main():
@@ -64,8 +65,18 @@ def main():
         default=False,
     )
 
+    parser.add_argument(
+        "-t",
+        "--test",
+        help="Simple built-in test client (Useful for development)",
+        choices=TEST_OPTIONS
+    )
+
     options = parser.parse_args()
     options.verbose = logging.WARNING - options.verbose * 10
+
+    if options.test:
+        return test_client(config, options)
 
     try:
         import setproctitle
