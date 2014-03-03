@@ -5,8 +5,8 @@ This is a simple forwarder bridge
 
 Config Example:
 [regrowl.bridge.forward]
-host = 127.0.0.1
-pass = p@ssword
+label = host,password
+other = host:port,password
 """
 
 from __future__ import absolute_import
@@ -28,23 +28,28 @@ __all__ = ['ForwardNotifier']
 class ForwardNotifier(ReGrowler):
     valid = ['REGISTER', 'NOTIFY']
 
-    def forward(self, messagetype, packet):
-        self.password = self.get('pass')
-        self.passwordHash = self.get('passwordHash', DEFAULTS['passwordHash'])
-        self.host = self.get('host')
-        self.port = self.getint('port', DEFAULTS['port'])
+    def forward(self, packet):
+        messagetype = packet.info['messagetype']
+        for label, settings in self.config.items(__name__):
+            dest, password = settings.split(',')
+            try:
+                host, port = dest.split(':')
+            except ValueError:
+                host, port = dest, DEFAULTS['port']
 
-        packet.set_password(self.password, self.passwordHash)
+            passwordHash = self.get('passwordHash', DEFAULTS['passwordHash'])
 
-        logger.info('Forwarding %s to %s:%s', messagetype, self.host, self.port)
+            packet.set_password(password, passwordHash)
 
-        self.growler = GrowlNotifier(
-            hostname=self.host,
-            port=self.port,
-        )._send(messagetype, packet)
+            logger.info('Forwarding %s to %s:%s', messagetype, host, port)
+
+            GrowlNotifier(
+                hostname=host,
+                port=port,
+            )._send(messagetype, packet)
 
     def register(self, packet):
-        self.forward('REGISTER', packet)
+        self.forward(packet)
 
     def notify(self, packet):
-        self.forward('NOTIFY', packet)
+        self.forward(packet)
