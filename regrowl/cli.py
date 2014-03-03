@@ -16,7 +16,7 @@ def main():
     )
 
     args, _ = parser.parse_known_args()
-    config = ReloadableConfig(DEFAULTS)
+    config = ReloadableConfig()
     config.read(args.config)
 
     # Redefine our parser so that -h works with the entire
@@ -27,7 +27,7 @@ def main():
         "--address",
         help="address to listen on",
         dest="host",
-        default=config.get('regrowl.server', 'host')
+        default=config.get('regrowl.server', 'host', DEFAULTS['host'])
     )
 
     parser.add_argument(
@@ -36,7 +36,7 @@ def main():
         help="port to listen on",
         dest="port",
         type=int,
-        default=config.getint('regrowl.server', 'port')
+        default=config.getint('regrowl.server', 'port', DEFAULTS['port'])
     )
 
     parser.add_argument(
@@ -44,7 +44,7 @@ def main():
         "--password",
         help="Network password",
         dest='password',
-        default=config.get('regrowl.server', 'password')
+        default=config.get('regrowl.server', 'password', DEFAULTS['password'])
     )
 
     # Debug Options
