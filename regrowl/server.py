@@ -92,7 +92,10 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
             self.server.notifiers = load_bridges(self.server.config)
 
         for bridge in self.server.notifiers:
-            bridge(self.server.config, message, self.hostaddr, self.port)
+            try:
+                bridge(self.server.config, message, self.hostaddr, self.port)
+            except:
+                logger.exception('Error calling %s', bridge)
 
     def get(self, key, default=None):
         return self.server.config.get(__name__, key, default)

@@ -6,6 +6,8 @@ from regrowl.server import GNTPServer
 from regrowl.config import ReloadableConfig, DEFAULTS
 from regrowl.test import test_client, TEST_OPTIONS
 
+logger = logging.getLogger(__name__)
+
 
 def main():
     parser = argparse.ArgumentParser(add_help=False)
@@ -88,6 +90,16 @@ def main():
         level=options.verbose,
         format="%(levelname)-7s %(name)-25s %(message)s"
     )
+
+    try:
+        from raven.conf import setup_logging
+        from raven.handlers.logging import SentryHandler
+        setup_logging(
+            SentryHandler(config.get('regrowl.server', 'sentry_dsn'), level=logging.ERROR)
+        )
+        logger.info('Enabled sentry')
+    except (ImportError, ValueError):
+        logger.warning('Error loading Sentry')
 
     server = GNTPServer(options, config)
     server.run()
