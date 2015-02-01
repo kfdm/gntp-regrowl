@@ -1,6 +1,7 @@
 """
 Echo a growl to OSX NotificationCenter
 Created by heilerich (https://github.com/heilerich)
+Requires PyObjC, install with pip
 
 Config Example:
 [regrowl.bridge.netcent]
@@ -10,9 +11,13 @@ verbose = True
 from __future__ import absolute_import
 
 import logging
-import Foundation
-import objc
-import AppKit
+
+try:
+    import Foundation
+    import objc
+    import AppKit
+except ImportError:
+    raise ImportError('Requires PyObjC, install with pip')
 
 from regrowl.regrowler import ReGrowler
 
@@ -25,6 +30,9 @@ SPACER = '=' * 80
 
 class NetCenter(ReGrowler):
     valid = ['REGISTER', 'NOTIFY']
+
+    def instance(self, packet):
+        pass
 
     def register(self, packet):
         logger.info('Register')

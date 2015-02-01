@@ -35,6 +35,7 @@ setup(
             'local = regrowl.bridge.local:LocalNotifier',
             'subscribe = regrowl.bridge.subscribe:SubscribelNotifier',
             'udp = regrowl.bridge.udp:UDPNotifier',
+            'netcent = regrowl.bridge.netcent:NetCenter'
         ]
     }
 )
