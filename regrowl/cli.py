@@ -4,6 +4,9 @@ import os
 
 from regrowl.server import GNTPServer
 from regrowl.config import ReloadableConfig, DEFAULTS
+from regrowl.test import test_client, TEST_OPTIONS
+
+logger = logging.getLogger(__name__)
 
 
 def main():
@@ -15,7 +18,7 @@ def main():
     )
 
     args, _ = parser.parse_known_args()
-    config = ReloadableConfig(DEFAULTS)
+    config = ReloadableConfig()
     config.read(args.config)
 
     # Redefine our parser so that -h works with the entire
@@ -26,7 +29,7 @@ def main():
         "--address",
         help="address to listen on",
         dest="host",
-        default=config.get('regrowl.server', 'host')
+        default=config.get('regrowl.server', 'host', DEFAULTS['host'])
     )
 
     parser.add_argument(
@@ -35,7 +38,7 @@ def main():
         help="port to listen on",
         dest="port",
         type=int,
-        default=config.getint('regrowl.server', 'port')
+        default=config.getint('regrowl.server', 'port', DEFAULTS['port'])
     )
 
     parser.add_argument(
@@ -43,7 +46,7 @@ def main():
         "--password",
         help="Network password",
         dest='password',
-        default=config.get('regrowl.server', 'password')
+        default=config.get('regrowl.server', 'password', DEFAULTS['password'])
     )
 
     # Debug Options
@@ -64,8 +67,18 @@ def main():
         default=False,
     )
 
+    parser.add_argument(
+        "-t",
+        "--test",
+        help="Simple built-in test client (Useful for development)",
+        choices=TEST_OPTIONS
+    )
+
     options = parser.parse_args()
     options.verbose = logging.WARNING - options.verbose * 10
+
+    if options.test:
+        return test_client(config, options)
 
     try:
         import setproctitle
@@ -75,8 +88,18 @@ def main():
 
     logging.basicConfig(
         level=options.verbose,
-        format="%(name)-25s %(levelname)s:%(message)s"
+        format="%(levelname)-7s %(name)-25s %(message)s"
     )
+
+    try:
+        from raven.conf import setup_logging
+        from raven.handlers.logging import SentryHandler
+        setup_logging(
+            SentryHandler(config.get('regrowl.server', 'sentry_dsn'), level=logging.ERROR)
+        )
+        logger.info('Enabled sentry')
+    except (ImportError, ValueError):
+        logger.warning('Error loading Sentry')
 
     server = GNTPServer(options, config)
     server.run()

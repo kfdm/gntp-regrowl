@@ -23,25 +23,28 @@ SPACER = '=' * 80
 
 
 class EchoNotifier(ReGrowler):
-    valid = ['REGISTER', 'NOTIFY']
+    valid = ['REGISTER', 'NOTIFY', 'SUBSCRIBE']
+
+    def format(self, packet, headers):
+        logger.info(packet.info['messagetype'])
+        if self.getboolean('verbose', False):
+            print SPACER
+            print packet
+            print SPACER
+        else:
+            print packet.info['messagetype']
+            for header in headers:
+                print header, ':', packet.headers[header]
 
     def register(self, packet):
-        logger.info('Register')
-        print 'Registration Packet:'
-        if self.getboolean('verbose', False):
-            print SPACER
-            print packet
-            print SPACER
-        else:
-            print packet.headers['Application-Name']
+        self.format(packet, ['Application-Name'])
 
     def notify(self, packet):
-        logger.info('Notify')
-        print 'Notification Packet:'
-        if self.getboolean('verbose', False):
-            print SPACER
-            print packet
-            print SPACER
-        else:
-            print packet.headers['Notification-Title'],
-            print packet.headers['Notification-Text']
+        self.format(packet, [
+            'Application-Name',
+            'Notification-Title',
+            'Notification-Text'
+        ])
+
+    def subscribe(self, packet):
+        self.format(packet, ['Subscriber-ID', 'Subscriber-Name'])

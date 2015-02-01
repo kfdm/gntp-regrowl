@@ -28,6 +28,13 @@ setup(
     entry_points={
         'console_scripts': [
             'regrowl = regrowl.cli:main'
+        ],
+        'regrowl.bridge': [
+            'echo = regrowl.bridge.echo:EchoNotifier',
+            'forward = regrowl.bridge.forward:ForwardNotifier',
+            'local = regrowl.bridge.local:LocalNotifier',
+            'subscribe = regrowl.bridge.subscribe:SubscribelNotifier',
+            'udp = regrowl.bridge.udp:UDPNotifier',
         ]
     }
 )

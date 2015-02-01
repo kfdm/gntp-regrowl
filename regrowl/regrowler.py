@@ -52,8 +52,8 @@ class ReGrowler(object):
                 return icon.read()
             else:
                 return None
-        except Exception, e:
-            print e
+        except Exception:
+            logger.exception('Error reading resource')
             return None
 
     def instance(self, packet):
