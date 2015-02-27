@@ -36,13 +36,13 @@ class NetCenter(ReGrowler):
 
     def register(self, packet):
         logger.info('Register')
-        print 'Registration Packet:'
+        logger.info('Registration Packet:')
         if self.getboolean('verbose', False):
-            print SPACER
-            print packet
-            print SPACER
+            logger.info(SPACER)
+            logger.info(packet)
+            logger.info(SPACER)
         else:
-            print packet.headers['Application-Name']
+            logger.info(packet.headers['Application-Name'])
 
     def mlnc_notify(self, title, subtitle, text, url):
         NSUserNotification = objc.lookUpClass('NSUserNotification')
@@ -60,14 +60,14 @@ class NetCenter(ReGrowler):
 
     def notify(self, packet):
         logger.info('Notify')
-        print 'Notification Packet:'
+        logger.info('Notification Packet:')
         if self.getboolean('verbose', False):
-            print SPACER
-            print packet
-            print SPACER
+            logger.info(SPACER)
+            logger.info(packet)
+            logger.info(SPACER)
         else:
-            print packet.headers['Notification-Title'],
-            print packet.headers['Notification-Text']
+            logger.info(packet.headers['Notification-Title'])
+            logger.info(packet.headers['Notification-Text'])
             if 'Notification-Callback-Target' in packet.headers:
                 self.mlnc_notify(packet.headers['Notification-Title'], "", packet.headers['Notification-Text'], packet.headers['Notification-Callback-Target'])
             else:
