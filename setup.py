@@ -33,6 +33,7 @@ setup(
             'echo = regrowl.bridge.echo:EchoNotifier',
             'forward = regrowl.bridge.forward:ForwardNotifier',
             'local = regrowl.bridge.local:LocalNotifier',
+            'netcent = regrowl.bridge.netcent:NetCenter',
             'subscribe = regrowl.bridge.subscribe:SubscribelNotifier',
             'udp = regrowl.bridge.udp:UDPNotifier',
         ]
