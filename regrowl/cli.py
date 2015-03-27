@@ -88,7 +88,7 @@ def main():
 
     logging.basicConfig(
         level=options.verbose,
-        format="%(levelname)-7s %(name)-25s %(message)s"
+        format="%(asctime)s %(levelname)-7s %(name)-25s %(message)s"
     )
 
     try:
