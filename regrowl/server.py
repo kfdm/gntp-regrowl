@@ -6,6 +6,7 @@
 import SocketServer
 import logging
 import platform
+import threading
 
 from gntp.core import parse_gntp, GNTPOK
 from gntp.errors import BaseError as GNTPError
@@ -93,7 +94,10 @@ class GNTPHandler(SocketServer.StreamRequestHandler):
 
         for bridge in self.server.notifiers:
             try:
-                bridge(self.server.config, message, self.hostaddr, self.port)
+                threading.Thread(
+                    target=bridge,
+                    args=(self.server.config, message, self.hostaddr, self.port)
+                ).start()
             except:
                 logger.exception('Error calling %s', bridge)
 
